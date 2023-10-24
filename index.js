@@ -1,5 +1,6 @@
 var myGamePiece;
 var myObstacles = [];
+const myCoins = [];
 var myScore;
 let barrior;
 let barrior2;
@@ -55,6 +56,12 @@ class Component {
             ctx.fillText(this.text, this.x, this.y);
         } else {
             ctx.fillStyle = this.color;
+            if (this.type === "coin") {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 20, 0, 2 * Math.PI);
+                ctx.fillStyle = "orange";
+                ctx.fill();
+            }
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
     }
@@ -91,7 +98,7 @@ class Component {
                 score += 500;
             }
             else {
-                score +=1000;
+                score += 1000;
             }
 
             myScore.text = "SCORE: " + score;
@@ -120,10 +127,17 @@ function updateGameArea() {
             return;
         }
     }
+    for (i = 0; i < myCoins.length; i += 1) {
+        if (myGamePiece.crashWith(myCoins[i])) {
+            score += 100;
+            myCoins[i].y = -100;
+        }
+    }
+
     myGameArea.clear();
     myGameArea.frameNo += 1;
     score += 1;
-    if (myGameArea.frameNo == 1 || everyinterval(150)) {
+    if (myGameArea.frameNo === 1 || everyinterval(150)) {
         x = myGameArea.canvas.width;
         minHeight = 20;
         maxHeight = 200;
@@ -133,11 +147,17 @@ function updateGameArea() {
         gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
         myObstacles.push(new Component(10, height, "green", x, 0));
         myObstacles.push(new Component(10, x - height - gap, "green", x, height + gap));
+        y = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
+        myCoins.push(new Component(0, 0, "yellow", x + 40, y, "coin"));
     }
-    for (i = 0; i < myObstacles.length; i += 1) {
+    for (i = 0; i < myCoins.length; i += 1) {
+        myCoins[i].x += -1;
         myObstacles[i].x += -1;
+        myCoins[i].update();
         myObstacles[i].update();
+
     }
+
     myScore.text = "SCORE: " + score;
     myScore.update();
     myGamePiece.newPos();
@@ -150,8 +170,10 @@ function updateGameArea() {
 }
 
 function everyinterval(n) {
-    if ((myGameArea.frameNo / n) % 1 == 0) { return true; }
-    return false;
+    return ((myGameArea.frameNo / n) % 1 == 0);
+}
+function everyhalfinterval(n) {
+    return ((myGameArea.frameNo / (n * 0.5)) % 1 == 0);
 }
 
 function accelerate(n) {
