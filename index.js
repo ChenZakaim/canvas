@@ -2,11 +2,16 @@ var myGamePiece;
 var myObstacles = [];
 var myScore;
 let barrior;
+let barrior2;
+let barrior3;
 let score = 0;
 let hasCrashed = false;
 
 function startGame() {
-    barrior = new Component(10, 270, "blue", 470, 0);
+    barrior2 = new Component(10, 90, "yellow", 470, 90);
+    barrior3 = new Component(10, 90, "green", 470, 180);
+    barrior = new Component(10, 270, "red", 470, 0);
+
     myGamePiece = new Component(30, 30, "red", 10, 120);
     myGamePiece.gravity = 0.05;
     myScore = new Component("30px", "Consolas", "black", 280, 40, "text");
@@ -77,13 +82,26 @@ class Component {
         var otherbottom = otherobj.y + (otherobj.height);
         if (myright >= otherleft && otherobj === barrior && !hasCrashed) {
             hasCrashed = true;
-            score += 1000
+
+            if (mytop <= 90) {
+
+                score += 200;
+            }
+            else if (mytop < 180) {
+                score += 500;
+            }
+            else {
+                score +=1000;
+            }
+
             myScore.text = "SCORE: " + score;
             myGameArea.clear();
             myScore.update();
             myGamePiece.newPos();
             myGamePiece.update();
             barrior.update();
+            barrior2.update();
+            barrior3.update();
             return true;
         }
         if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
@@ -126,6 +144,9 @@ function updateGameArea() {
     myGamePiece.update();
     myGamePiece.x += 0.5;
     barrior.update();
+    barrior2.update();
+    barrior3.update();
+
 }
 
 function everyinterval(n) {
