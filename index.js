@@ -1,8 +1,12 @@
 var myGamePiece;
 var myObstacles = [];
 var myScore;
+let barrior;
+let score = 0;
+let hasCrashed = false;
 
 function startGame() {
+    barrior = new Component(10, 270, "blue", 470, 0);
     myGamePiece = new Component(30, 30, "red", 10, 120);
     myGamePiece.gravity = 0.05;
     myScore = new Component("30px", "Consolas", "black", 280, 40, "text");
@@ -71,11 +75,22 @@ class Component {
         var otherright = otherobj.x + (otherobj.width);
         var othertop = otherobj.y;
         var otherbottom = otherobj.y + (otherobj.height);
-        var crash = true;
-        if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
-            crash = false;
+        if (myright >= otherleft && otherobj === barrior && !hasCrashed) {
+            hasCrashed = true;
+            score += 1000
+            myScore.text = "SCORE: " + score;
+            myGameArea.clear();
+            myScore.update();
+            myGamePiece.newPos();
+            myGamePiece.update();
+            barrior.update();
+            return true;
         }
-        return crash;
+        if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+            return false;
+        }
+
+        return true;
     }
 }
 
@@ -83,19 +98,20 @@ class Component {
 function updateGameArea() {
     var x, height, gap, minHeight, maxHeight, minGap, maxGap;
     for (i = 0; i < myObstacles.length; i += 1) {
-        if (myGamePiece.crashWith(myObstacles[i])) {
+        if (myGamePiece.crashWith(myObstacles[i]) || myGamePiece.crashWith(barrior)) {
             return;
         }
     }
     myGameArea.clear();
     myGameArea.frameNo += 1;
+    score += 1;
     if (myGameArea.frameNo == 1 || everyinterval(150)) {
         x = myGameArea.canvas.width;
         minHeight = 20;
         maxHeight = 200;
         height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
-        minGap = 50;
-        maxGap = 200;
+        minGap = 200;
+        maxGap = 300;
         gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
         myObstacles.push(new Component(10, height, "green", x, 0));
         myObstacles.push(new Component(10, x - height - gap, "green", x, height + gap));
@@ -104,10 +120,12 @@ function updateGameArea() {
         myObstacles[i].x += -1;
         myObstacles[i].update();
     }
-    myScore.text = "SCORE: " + myGameArea.frameNo;
+    myScore.text = "SCORE: " + score;
     myScore.update();
     myGamePiece.newPos();
     myGamePiece.update();
+    myGamePiece.x += 0.5;
+    barrior.update();
 }
 
 function everyinterval(n) {
